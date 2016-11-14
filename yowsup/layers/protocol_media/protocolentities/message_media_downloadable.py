@@ -55,7 +55,7 @@ class DownloadableMediaMessageProtocolEntity(MediaMessageProtocolEntity):
         data = urlopen(self.url.decode()).read()
         if self.isEncrypted():
             data = self.decrypt(data, self.mediaKey)
-        return bytearray(data)
+        return data
 
     def setDownloadableMediaProps(self, mimeType, fileHash, url, ip, size, fileName, mediaKey):
         self.mimeType   = mimeType
