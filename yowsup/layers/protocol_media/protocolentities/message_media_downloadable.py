@@ -1,6 +1,12 @@
 from .message_media import MediaMessageProtocolEntity
 from yowsup.common.tools import WATools
 from yowsup.common.tools import MimeTools
+from Crypto.Cipher import AES
+from urllib.request import urlopen
+from axolotl.kdf.hkdfv3 import HKDFv3
+from axolotl.util.byteutil import ByteUtil
+import binascii
+import base64
 import os
 class DownloadableMediaMessageProtocolEntity(MediaMessageProtocolEntity):
     '''
@@ -45,6 +51,12 @@ class DownloadableMediaMessageProtocolEntity(MediaMessageProtocolEntity):
     def getMimeType(self):
         return self.mimeType
 
+    def getMediaContent(self):
+        data = urlopen(self.url.decode()).read()
+        if self.isEncrypted():
+            data = self.decrypt(data, self.mediaKey)
+        return bytearray(data)
+
     def setDownloadableMediaProps(self, mimeType, fileHash, url, ip, size, fileName, mediaKey):
         self.mimeType   = mimeType
         self.fileHash   = fileHash
@@ -69,8 +81,19 @@ class DownloadableMediaMessageProtocolEntity(MediaMessageProtocolEntity):
 
         return node
 
+    def decrypt(self, encimg, refKey):
+        derivative = HKDFv3().deriveSecrets(refKey,
+                binascii.unhexlify(self.cryptKeys), 112)
+        parts = ByteUtil.split(derivative, 16, 32)
+        iv = parts[0]
+        cipherkey = parts[1]
+        e_img = encimg[:-10]
+        AES.key_size = 128
+        cr_obj = AES.new(key=cipherkey, mode=AES.MODE_CBC, IV=iv)
+        return cr_obj.decrypt(e_img)
+
     def isEncrypted(self):
-        return self.mediaKey is not None
+        return self.cryptKeys and self.mediaKey
 
     @staticmethod
     def fromProtocolTreeNode(node):
