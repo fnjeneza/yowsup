@@ -14,7 +14,7 @@ class AuthenticationProtocolLayerTest(YowLayerTest, YowAuthenticationProtocolLay
         dummyStack = YowStack()
         self.setStack(dummyStack)
 
-        self.credentials =  ("dummyusername", bytearray("password", "latin-1"))
+        self.credentials =  ("dummyusername", bytearray("password", "utf-8"))
         dummyStack.setProp(YowAuthenticationProtocolLayer.PROP_CREDENTIALS, self.credentials)
         #ticatorLayer.setProp("credentials", self.credentials)
 
