@@ -106,7 +106,7 @@ class AxolotlReceivelayer(AxolotlBaseLayer):
             self.getKeysFor([senderJid], successFn)
 
         except DuplicateMessageException as e:
-            logger.warning("Received a message that we've previously decrypted, goint to send the delivery receipt myself")
+            logger.warning("Received a message that we've previously decrypted, going to send the delivery receipt myself")
             self.toLower(OutgoingReceiptProtocolEntity(node["id"], node["from"], participant=node["participant"]).toProtocolTreeNode())
 
         except UntrustedIdentityException as e:
